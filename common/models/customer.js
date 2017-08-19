@@ -9,6 +9,21 @@ var loopback = require('loopback');
 //   name: "Olive Theory"
 // }
 // var HOST = "social.olivetheory.com";
+// var app = require('../app');
+
+// var Customer = module.exports = loopback.createModel(
+//   'Customer',
+//   {
+//     name: 'string',
+//     // and all other more properties
+//   },
+//   {
+//     base: 'User',
+//     strict: true
+//   }
+// );
+
+// app.model(Customer);
 
   module.exports = function(Customer) {
   	Customer.validatesUniquenessOf('email', {message: 'email is not unique'});
@@ -28,9 +43,77 @@ var loopback = require('loopback');
   	
 
   	//var Customer = app.models.Customer;
-  	 Customer.signup = function(data){
+  	 Customer.signup = function(data, cb){
 
-  	 	
+  	 // 	if (!data) {
+    //   var e = new Error();
+    //   e.status = 422;
+    //   e.name = "ValidationError";
+    //   e.message = "customer instance is not valid"
+    //   return cb(e);
+    // }
+    // if (Object.keys(data).length === 0) {
+    //   var e = new Error();
+    //   e.status = 422;
+    //   e.name = "ValidationError";
+    //   e.message = "customer instance is not valid"
+    //   return cb(e);
+    // }
+    // if (!data.customername) {
+    //   var e = new Error();
+    //   e.status = 422;
+    //   e.name = "ValidationError";
+    //   e.message = "customername can't be blank";
+    //   return cb(e);
+    // }
+    // if (!(data.email && utils.validateEmail(data.email))) {
+    //   var e = new Error();
+    //   e.status = 422;
+    //   e.name = "ValidationError";
+    //   e.message = "Email is not valid";
+    //   return cb(e);
+    // }
+    // if (!data.password) {
+    //   var e = new Error();
+    //   e.status = 422;
+    //   e.name = "ValidationError";
+    //   e.message = "Password can't be blank";
+    //   return cb(e);
+    // }
+    // var newcustomer = {
+    //   email: data.email.toLowerCase(),
+    //   password: data.password
+    // };
+    // Customer.create(newcustomer, function(err, customer) {
+    //   if (err) {
+    //     return cb(err);
+    //   } else {
+    //     var customer = {
+    //       customername: data.customername,
+    //       password: data.password,
+    //       email:data.email
+    //       },
+    //        if (data.email) {
+    //       Customer.findOne({ where: { "email": data.email } }, function(err, p) {
+    //        if (!err & !!p) {
+    //           var e = new Error();
+    //           e.status = 422;
+    //          e.name = "ValidationError";
+    //            e.message = "Email already exists";
+    //           return cb(e);
+    //         } else {
+    //            Customer.create(customer, function(err, result) {
+    //              if (err) {
+    //                Customer.deleteById(customer.id);
+    //                return cb(err);
+    //              }
+    //              cb(null, customer);
+    //            }, customer.id);
+    //          }
+    //      });
+    //      } 
+    //    }
+    // });
   	 
 
   	 	//console.log(data)
@@ -61,7 +144,7 @@ var loopback = require('loopback');
   );
 
   Customer.login = function(credentials, include, fn) {
-    var self = this;
+   var self = this;
     if (typeof include === 'function') {
       fn = include;
       include = undefined;
@@ -89,14 +172,14 @@ var loopback = require('loopback');
       realmDelimiter);
 
     if (realmRequired && !query.realm) {
-      var err1 = new Error('{{realm}} is required');
+      var err1 = new Error('realm is required');
       err1.statusCode = 400;
       err1.code = 'REALM_REQUIRED';
       fn(err1);
       return fn.promise;
     }
     if (!query.email && !query.username) {
-      var err2 = new Error('{{username}} or {{email}} is required');
+      var err2 = new Error('username or email is required');
       err2.statusCode = 400;
       err2.code = 'USERNAME_EMAIL_REQUIRED';
       fn(err2);
@@ -117,18 +200,18 @@ var loopback = require('loopback');
       }
 
       if (err) {
-        debug('An error is reported from Customer.findOne: %j', err);
+        debug('An error is reported from customer.findOne: %j', err);
         fn(defaultError);
       } else if (customer) {
         customer.hasPassword(credentials.password, function(err, isMatch) {
           if (err) {
-            debug('An error is reported from Customer.hasPassword: %j', err);
+            debug('An error is reported from customer.hasPassword: %j', err);
             fn(defaultError);
           } else if (isMatch) {
             if (self.settings.emailVerificationRequired && !customer.emailVerified) {
               // Fail to log in if email verification is not done yet
-              debug('User email has not been verified');
-              err = new Error(f('login failed as the email has not been verified'));
+              debug('customer email has not been verified');
+              err = new Error('login failed as the email has not been verified');
               err.statusCode = 401;
               err.code = 'LOGIN_FAILED_EMAIL_NOT_VERIFIED';
               err.details = {
@@ -143,17 +226,32 @@ var loopback = require('loopback');
               }
             }
           } else {
-            debug('The password is invalid for user %s', query.email || query.username);
             fn(defaultError);
           }
         });
-       } else {
-       debug('No matching record is found for user %s', query.email || query.username);
+      } else {
         fn(defaultError);
       }
     });
     return fn.promise;
-  };
+  
+};
+  /**
+   * Logout a customer with the given accessToken id.
+   *
+   * ```js
+   *    customer.logout('asd0a9f8dsj9s0s3223mk', function (err) {
+  *      console.log(err || 'Logged out');
+  *    });
+   * ```
+   *
+   * @param {String} accessTokenID
+   * @callback {Function} callback
+   * @param {Error} err
+   * @promise
+   */
+
+
 
   Customer.normalizeCredentials = function(credentials, realmRequired, realmDelimiter) {
     var query = {};
@@ -161,8 +259,8 @@ var loopback = require('loopback');
     if (!realmRequired) {
       if (credentials.email) {
         query.email = credentials.email;
-      } else if (credentials.username) {
-        query.username = credentials.username;
+      } else if (credentials.customername) {
+        query.customername = credentials.customername;
       } else if (credentials.phone) {
         query.phone = credentials.phone;
       }
@@ -177,9 +275,9 @@ var loopback = require('loopback');
         if (parts[0]) {
           query.realm = parts[0];
         }
-      } else if (credentials.username) {
-        parts = splitPrincipal(credentials.username, realmDelimiter);
-        query.username = parts[1];
+      } else if (credentials.customername) {
+        parts = splitPrincipal(credentials.customername, realmDelimiter);
+        query.customername = parts[1];
         if (parts[0]) {
           query.realm = parts[0];
         }
@@ -187,6 +285,17 @@ var loopback = require('loopback');
     }
     return query;
   };
+  
+  // User.beforeRemote("logout", function(ctx, modelInstance, next) {
+  //   try {
+  //     if (ctx.req) {
+  //       ctx.req.logout();
+  //     }
+  //   } catch (err) {
+  //     return next(err);
+  //   }
+  //   next();
+  // });
 
 
   Customer.logout = function(tokenId, fn) {
@@ -194,7 +303,7 @@ var loopback = require('loopback');
 
     var err;
     if (!tokenId) {
-      err = new Error('{{accessToken}} is required to logout');
+      err = new Error('accessToken is required to logout');
       err.status = 401;
       process.nextTick(fn, err);
       return fn.promise;
@@ -204,7 +313,7 @@ var loopback = require('loopback');
       if (err) {
         fn(err);
       } else if ('count' in info && info.count === 0) {
-        err = new Error('Could not find {{accessToken}}');
+        err = new Error('Could not find accessToken');
         err.status = 401;
         fn(err);
       } else {
@@ -243,20 +352,20 @@ var loopback = require('loopback');
   );
 
 
-  Customer.beforeRemote("logout", function(ctx, modelInstance, next) {
-    try {
-      if (ctx.req) {
-        ctx.req.logout();
-      }
-    } catch (err) {
-      return next(err);
-    }
-    next();
-  });
+  // Customer.beforeRemote("logout", function(ctx, modelInstance, next) {
+  //   try {
+  //     if (ctx.req) {
+  //       ctx.req.logout();
+  //     }
+  //   } catch (err) {
+  //     return next(err);
+  //   }
+  //   next();
+  // });
 
 //   app.get('/logout', function(req, res, next) {
 //   if (!req.accessToken) return res.sendStatus(401); //return 401:unauthorized if accessToken is not present
-//   User.logout(req.accessToken.id, function(err) {
+//   customer.logout(req.accessToken.id, function(err) {
 //     if (err) return next(err);
 //     res.redirect('/'); //on successful logout, redirect
 //   });
@@ -264,6 +373,52 @@ var loopback = require('loopback');
 
   
   Customer.social = function(data, next) {
+  	 if (!data) {
+      var e = new Error();
+      e.status = 500;
+      e.message = "data is not defined from Facebook/Google";
+      return next(e);
+    }
+    var profile = data.profile;
+    if (!profile) {
+      var e = new Error();
+      e.status = 500;
+      e.message = "profile is not defined from Facebook/Google";
+      return next(e);
+    }
+    var provider = profile.provider;
+    if (!provider) {
+      var e = new Error();
+      e.status = 500;
+      e.message = "provider is not defined from Facebook/Google";
+      return next(e);
+    }
+    var authSchema = data.authSchema;
+    if (!authSchema) {
+      var e = new Error();
+      e.status = 500;
+      e.message = "authSchema is not defined from Facebook/Google";
+      return next(e);
+    }
+    var accessToken = data.accessToken;
+    if (!accessToken) {
+      var e = new Error();
+      e.status = 500;
+      e.message = "accessToken is not defined from Facebook/Google";
+      return next(e);
+    }
+    var credentials = {};
+    credentials.accessToken = accessToken;
+    UserIdentity.login(
+      provider, authSchema, profile, credentials, {
+        autoLogin: true
+      },
+      function(err, loopbackUser, identity, token) {
+        if (err) {
+          return next(err);
+        }
+        return next(null, token);
+      });
     
   }
 
@@ -350,6 +505,52 @@ var loopback = require('loopback');
   );
 
   Customer.setPassword = function(doc, cb) {
+
+  	var ctx = loopback.getCurrentContext();
+    var req = ctx && ctx.get('http') && ctx.get('http').req;
+    var aToken = (ctx && ctx.get('accessToken')) || (req && req.accessToken);
+    var password = doc.password;
+    var currentUser = ctx && ctx.get('currentUser');
+    var hash = doc.hash;
+    var oldPassword = doc.oldPassword;
+    var dateHash = md5(aToken.created);
+    if (oldPassword) {
+      currentUser.hasPassword(oldPassword, function(err, isMatch) {
+        if (err) {
+          return cb(err);
+        }
+        if (isMatch) {
+          currentUser.password = password;
+          currentUser.save(function(err, user) {
+            if (err) {
+              return cb(err);
+            }
+            return cb();
+          });
+        } else {
+          var e = new Error();
+          e.code = "UNAUTHORIZED";
+          e.status = 401;
+          e.message = "Incorrect old password";
+          return cb(e);
+        }
+      });
+    } else {
+      if (hash !== dateHash) {
+        var e = new Error();
+        e.code = "UNAUTHORIZED";
+        e.status = 401;
+        e.message = "Hash is incorrect";
+        return cb(e);
+      }
+      currentUser.password = password;
+      currentUser.save(function(err, user) {
+        if (err) {
+          return cb(err);
+        }
+        return cb();
+      });
+    }
    
   }
 

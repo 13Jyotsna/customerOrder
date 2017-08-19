@@ -4,6 +4,8 @@
   "base": "PersistedModel",
   "idInjection": true,
   "options": {
+    "base": "User",
+      "strict": true,
     "validateUpsert": true
   },
   "properties": {
@@ -44,7 +46,7 @@
      {
       "principalType": "ROLE",
       "principalId": "$everyone",
-      "permission": "DENY"
+      "permission": "ALLOW"
     },
     {
       "principalType": "ROLE",
