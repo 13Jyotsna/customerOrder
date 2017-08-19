@@ -4,46 +4,11 @@ var path = require('path');
 // var async = require('async');
 // var md5 = require('md5');
 var loopback = require('loopback');
-// var emailFrom = {
-//   email: "reachus@olivetheory.com",
-//   name: "Olive Theory"
-// }
-// var HOST = "social.olivetheory.com";
-// var app = require('../app');
-
-// var Customer = module.exports = loopback.createModel(
-//   'Customer',
-//   {
-//     name: 'string',
-//     // and all other more properties
-//   },
-//   {
-//     base: 'User',
-//     strict: true
-//   }
-// );
-
-// app.model(Customer);
-
   module.exports = function(Customer) {
-  	Customer.validatesUniquenessOf('email', {message: 'email is not unique'});
-  // 	customer.observe("before save", function(ctx, next) {
-  //   if (ctx.isNewInstance) {
-  //     if (ctx.instance) {
-  //       ctx.instance.created = new Date();
-  //     }
-  //   } else {
-  //     if (ctx.instance) {
-  //       ctx.instance.updated = new Date();
-  //     }
-  //   }
-  //   return next();
-  // });
-
-  	
-
+  	Customer.validatesUniquenessOf('email', {message: 'email is not unique'})
   	//var Customer = app.models.Customer;
   	 Customer.signup = function(data, cb){
+  	 	//use POST /cutomers
 
   	 // 	if (!data) {
     //   var e = new Error();
@@ -236,22 +201,7 @@ var loopback = require('loopback');
     return fn.promise;
   
 };
-  /**
-   * Logout a customer with the given accessToken id.
-   *
-   * ```js
-   *    customer.logout('asd0a9f8dsj9s0s3223mk', function (err) {
-  *      console.log(err || 'Logged out');
-  *    });
-   * ```
-   *
-   * @param {String} accessTokenID
-   * @callback {Function} callback
-   * @param {Error} err
-   * @promise
-   */
-
-
+  
 
   Customer.normalizeCredentials = function(credentials, realmRequired, realmDelimiter) {
     var query = {};
@@ -286,17 +236,6 @@ var loopback = require('loopback');
     return query;
   };
   
-  // User.beforeRemote("logout", function(ctx, modelInstance, next) {
-  //   try {
-  //     if (ctx.req) {
-  //       ctx.req.logout();
-  //     }
-  //   } catch (err) {
-  //     return next(err);
-  //   }
-  //   next();
-  // });
-
 
   Customer.logout = function(tokenId, fn) {
     fn = fn || utils.createPromiseCallback();
@@ -323,13 +262,6 @@ var loopback = require('loopback');
     return fn.promise;
   };
 
-  //Customer.login = function(data,callback){
-
-  	//console.log(data);
-
-		
-  //}
-
   Customer.remoteMethod(
     'login', {
       accepts: {
@@ -351,27 +283,6 @@ var loopback = require('loopback');
     }
   );
 
-
-  // Customer.beforeRemote("logout", function(ctx, modelInstance, next) {
-  //   try {
-  //     if (ctx.req) {
-  //       ctx.req.logout();
-  //     }
-  //   } catch (err) {
-  //     return next(err);
-  //   }
-  //   next();
-  // });
-
-//   app.get('/logout', function(req, res, next) {
-//   if (!req.accessToken) return res.sendStatus(401); //return 401:unauthorized if accessToken is not present
-//   customer.logout(req.accessToken.id, function(err) {
-//     if (err) return next(err);
-//     res.redirect('/'); //on successful logout, redirect
-//   });
-// });
-
-  
   Customer.social = function(data, next) {
   	 if (!data) {
       var e = new Error();
@@ -573,8 +484,6 @@ var loopback = require('loopback');
       }
     }
   );
-
-
   
   Customer.findByName = function(customerName, callback) {
     Customer.findOne({

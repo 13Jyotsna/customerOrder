@@ -14,25 +14,36 @@
     ]
   },
   "Customer": {
-    "dataSource": "db"
+    "dataSource": "order",
+    "public": true,
+    "options": {
+      "emailVerificationRequired": false
+    },
+    "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW"
+    }
+]
   },
   "AccessToken": {
-    "dataSource": "db",
+    "dataSource": "order",
     "public": false
   },
   "ACL": {
-    "dataSource": "db",
+    "dataSource": "order",
     "public": false
   },
   "RoleMapping": {
-    "dataSource": "db",
+    "dataSource": "order",
     "public": false,
     "options": {
       "strictObjectIDCoercion": true
     }
   },
   "Role": {
-    "dataSource": "db",
+    "dataSource": "order",
     "public": false
   },
   "Customer": {
